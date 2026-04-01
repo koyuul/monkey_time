@@ -1,10 +1,15 @@
-from micropython import const
-import lvgl as lv
+"""
+    LVGL manager: init + asyncio task for LVGL display.
+"""
 import time
-import machine
+
 import lcd_bus
+import lvgl as lv
+import machine
 import st7796
 import task_handler
+import uasyncio as asyncio
+from micropython import const
 
 _DISPLAY_WIDTH = const(480)
 _DISPLAY_HEIGHT = const(320)
@@ -21,9 +26,10 @@ _DISPLAY_BUS_DC = const(2)
 _DISPLAY_BUS_CS = const(15)
 _DISPLAY_BACKLIGHT_PIN = const(27)
 
-class LVGLManager():
+class LVGLManager:
     def __init__(self):
         """Initialize LVGL and set up display/input drivers."""
+        # Initialize hardware setup
         spi_bus = machine.SPI.Bus(
             host=_SPI_BUS_HOST,
             mosi=_SPI_BUS_MOSI,
@@ -46,53 +52,54 @@ class LVGLManager():
             color_byte_order=st7796.BYTE_ORDER_BGR if _DISPLAY_BGR else st7796.BYTE_ORDER_RGB,
             rgb565_byte_swap=_DISPLAY_RGB565_BYTE_SWAP
         )
-        # The rotation table MUST be defined
-        display._ORIENTATION_TABLE = (
+        display._ORIENTATION_TABLE = ( # The rotation table MUST be defined
             _DISPLAY_ROT, # this value sets the rotation
             0x0, # placeholder
             0x0, # placeholder
             0x0 # placeholder
         )
+        display.set_rotation(lv.DISPLAY_ROTATION._0)
+        display.set_power(True)
+        display.init()
+        display.set_backlight(100)
 
-
-
-def init_lvgl():
-    """Initialize LVGL bindings and register display/input drivers."""
-    try:
-        lv.init()
-    except Exception:
-        pass
-    
-    # Create a simple screen with a centered label
-    try:
-        scr = lv.scr_act()
-        lbl = lv.label(scr)
-        lbl.set_text("Monkey Hour")
+        # Set up task handler for LVGL and initialize LVGL
+        task_handler.TaskHandler()
         try:
-            lv.obj.align(lbl, None, lv.ALIGN.CENTER, 0, 0)
-        except Exception:
-            # alternate API
-            lbl.align(None, lv.ALIGN.CENTER, 0, 0)
-    except Exception as exc:
-        print("init_lvgl: failure in LVGL display", exc)
-
-async def lvgl_task():
-    """Run LVGL's Task Handler in the main scheduler loop"""
-    prev = time.ticks_ms()
-    while True:
-        current = time.ticks_ms()
-        elapsed = time.ticks_diff(current, prev)
-        if elapsed >= 0: # Tick every 10ms
-            try:
-                lv.tick_inc(elapsed)
-            except Exception:
-                pass
-            prev = current
-        
-        try:
-            lv.task_handler()
+            lv.init()
         except Exception:
             pass
+        
+        # Create a simple screen with a centered label
+        try:
+            scr = lv.scr_act()
+            lbl = lv.label(scr)
+            lbl.set_text("Monkey Hour")
+            try:
+                lv.obj.align(lbl, None, lv.ALIGN.CENTER, 0, 0)
+            except Exception:
+                # alternate API
+                lbl.align(None, lv.ALIGN.CENTER, 0, 0)
+        except Exception as exc:
+            print("init_lvgl: failure in LVGL display", exc)
 
-        await asyncio.sleep_ms(10) # Tick every 10ms
+    async def update_display(self):
+        """Run LVGL's Task Handler in the main scheduler loop"""
+        prev = time.ticks_ms()
+        while True:
+            current = time.ticks_ms()
+            elapsed = time.ticks_diff(current, prev)
+            if elapsed >= 0: # Tick every 10ms
+                try:
+                    lv.tick_inc(elapsed)
+                except Exception:
+                    pass
+                prev = current
+            
+            try:
+                lv.task_handler()
+            except Exception:
+                pass
+
+            await asyncio.sleep_ms(10) # Tick every 10ms
         
