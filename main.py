@@ -4,6 +4,7 @@
 import uasyncio as asyncio
 from lib.analog_input_manager import AnalogInputManager
 from lib.lvgl_manager import LVGLManager
+from lib.time_manager import TimeManager
 
 
 async def _scheduler_loop():
