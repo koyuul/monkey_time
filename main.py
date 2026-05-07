@@ -17,14 +17,20 @@ async def _scheduler_loop():
 
     # Handle analog input
     analog_input_manager = AnalogInputManager()
-    tasks.append(asyncio.create_task(analog_input_manager.poll_inputs()))
+    tasks.append(asyncio.create_task(analog_input_manager.run()))
 
     # Handle time management
     time_manager = TimeManager(analog_input_manager.get_i2c())
     analog_input_manager.register_callback(
-        0,
+        "button_press",
         time_manager.set_time,
-        (2024, 6, 1, 5, 12, 0, 0, 0))
+        (2024, 6, 1, 5, 12, 0, 0, 0)
+    )
+    analog_input_manager.register_callback(
+        "rotary_turn",
+        print,
+        ("hello world")
+    )
 
     while True:
         print("Current time:", time_manager.get_time())

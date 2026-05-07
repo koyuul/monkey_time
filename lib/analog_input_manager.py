@@ -6,77 +6,67 @@ import time
 import uasyncio as asyncio
 import utils.mcp23017
 from machine import I2C, Pin
+from utils.hardware_handlers.button_handler import ButtonHandler
+from utils.hardware_handlers.rotary_handler import RotaryHandler
 
-_INPUT = 1
-_I2C_ID = 0
-_SCL_PIN = 25
-_SDA_PIN = 32
-_FREQ = 400000
-_ADDRESS = 0x20
-_BUTTON_PINS = [0, 1]
-_BUTTON_DEBOUNCE_MS = 50
-_POLL_INTERVAL_MS = 10
+_MCP_I2C_ID = 0
+_MCP_SCL_PIN = 25
+_MCP_SDA_PIN = 32
+_MCP_FREQ = 400000
+_MCP_ADDRESS = 0x20
+_MCP_POLL_INTERVAL_MS = 1
+
+_ROTARY_1_PINS = {
+    "sw": 5,
+    "dt": 4,
+    "clk": 3,
+}
 
 class AnalogInputManager:
     def __init__(self):
         """Initialize I2C and MCP23017 and configure pins as inputs with pull-ups."""
-        self.i2c = I2C(_I2C_ID, scl=Pin(_SCL_PIN), sda=Pin(_SDA_PIN), freq=_FREQ)
-        self.mcp = utils.mcp23017.MCP23017(self.i2c, address=_ADDRESS)
-
-        # Configure each button pin as input
-        for pin in _BUTTON_PINS:
-            self.mcp.pin(pin, mode=_INPUT, pullup=True, polarity=1)
-
-        # Configure interrupt
+        self.i2c = I2C(_MCP_I2C_ID, scl=Pin(_MCP_SCL_PIN), sda=Pin(_MCP_SDA_PIN), freq=_MCP_FREQ)
+        self.mcp = utils.mcp23017.MCP23017(self.i2c, address=_MCP_ADDRESS)
         self.mcp.config(interrupt_polarity=0, interrupt_mirror=1)
 
-        # Set up call backs to have other apps be notified of inputs
-        self._callbacks = {pin: [] for pin in _BUTTON_PINS}
-        self._last_state =  {pin: False for pin in _BUTTON_PINS}
-        self._last_change = {pin: time.ticks_ms() for pin in _BUTTON_PINS}
-        self._debounce_ms = _BUTTON_DEBOUNCE_MS
-    
+        self.queue = []
+
+        self.handlers = [
+            ButtonHandler(self.mcp, 0, self.queue),
+            ButtonHandler(self.mcp, 1, self.queue),
+            RotaryHandler(self.mcp, self.mcp.porta, _ROTARY_1_PINS, self.queue),
+        ]
+
+        self.callbacks = {}
+
+    def register_callback(self, event_type, callback, *args, **kwargs):
+        if event_type not in self.callbacks:
+            self.callbacks[event_type] = []
+        self.callbacks[event_type].append((callback, args, kwargs))
+
+    async def _run_handlers(self):
+        for handler in self.handlers:
+            asyncio.create_task(handler.run())
+
     def get_i2c(self):
         """Return the I2C instance for external use."""
         return self.i2c
     
-    def register_callback(self, pin, callback, *args, **kwargs):
-        """Register a callback for a specific pin."""
-        if pin in self._callbacks:
-            self._callbacks[pin].append((callback, args, kwargs))
-    
-    def unregister_callback(self, pin, callback):
-        """Unregister a callback for a specific pin."""
-        if pin in self._callbacks and callback in self._callbacks[pin]:
-            self._callbacks[pin].remove(callback)
-
-    async def poll_inputs(self):
-        """Continuously poll the configured pins"""
+    async def _event_loop(self):
         while True:
-            now = time.ticks_ms()
-            for pin in _BUTTON_PINS:
-                # Read current state of the pin and register an event if any button pressed
-                pressed = bool(self.mcp.pin(pin))
-                if (
-                    pressed != self._last_state[pin] and 
-                    time.ticks_diff(now, self._last_change[pin]) > self._debounce_ms
-                ):
-                    self._last_state[pin] = pressed
-                    self._last_change[pin] = now
-                    if pressed:
-                        event = {"pin": pin, "timestamp": now}
-                        print(f"Button press: {event}")
-                        
-                        # Handle callbacks
-                        for callback, args, kwargs in self._callbacks[pin]:
-                            try: 
-                                # Call the callback
-                                result = callback(event, *args, **kwargs)
+            if self.queue:
+                event = self.queue.pop(0)
+                event_type = event[0]
+                if event_type in self.callbacks:
+                    for cb, args, kwargs in self.callbacks[event_type]:
+                        result = cb(event, *args, **kwargs)
 
-                                # Handle if callback is async
-                                if hasattr(result, "__await__"):
-                                    asyncio.create_task(result)
-                            except Exception as e:
-                                print("Callback error:", e)
+                        # handle async callbacks too
+                        if hasattr(result, "__await__"):
+                            asyncio.create_task(result)
+            else:
+                await asyncio.sleep_ms(_MCP_POLL_INTERVAL_MS)
 
-            await asyncio.sleep_ms(_POLL_INTERVAL_MS)
+    async def run(self):
+        await self._run_handlers()
+        await self._event_loop()
