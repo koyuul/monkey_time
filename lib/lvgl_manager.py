@@ -48,7 +48,6 @@ class LVGLManager:
         # Initialize LVGL
         lv.init()
         self.scr = lv.screen_active()
-        setup_main_ui(self.scr)
 
     async def update_display(self):
         """Run LVGL's Task Handler in the main scheduler loop"""
@@ -56,12 +55,4 @@ class LVGLManager:
             lv.tick_inc(5)
             lv.task_handler()
             await asyncio.sleep_ms(10)
-        
-def setup_main_ui(scr):
-    """Build UI here or call your Rect/Label setup functions"""
-    scr.set_style_bg_color(lv.color_black(), lv.PART.MAIN)
-    
-    lbl = lv.label(scr)
-    lbl.set_text("Monkey Hour")
-    lbl.align(lv.ALIGN.CENTER, 0, 0)
-    lbl.set_style_text_color(lv.color_white(), 0)
+                                                                        

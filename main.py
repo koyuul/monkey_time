@@ -3,6 +3,7 @@
 """
 import uasyncio as asyncio
 from lib.analog_input_manager import AnalogInputManager
+from lib.component_manager import ComponentManager
 from lib.lvgl_manager import LVGLManager
 from lib.time_manager import TimeManager
 
@@ -19,21 +20,16 @@ async def _scheduler_loop():
     analog_input_manager = AnalogInputManager()
     tasks.append(asyncio.create_task(analog_input_manager.run()))
 
+    # Handle LVGL navigation via analog input
+    component_manager = ComponentManager(analog_input_manager, lvgl_manager,)
+    component_manager.build_ui()
+    tasks.append(asyncio.create_task(component_manager.handle_input()))
+
     # Handle time management
     time_manager = TimeManager(analog_input_manager.get_i2c())
-    analog_input_manager.register_callback(
-        "button_press",
-        time_manager.set_time,
-        (2024, 6, 1, 5, 12, 0, 0, 0)
-    )
-    analog_input_manager.register_callback(
-        "rotary_turn",
-        print,
-        ("hello world")
-    )
+    print(time_manager.get_time())
 
     while True:
-        print("Current time:", time_manager.get_time())
         await asyncio.sleep(1)
 
 def main():

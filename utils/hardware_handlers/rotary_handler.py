@@ -1,6 +1,7 @@
 import uasyncio as asyncio
 
-_ROTARY_POLL_INTERVAL_MS = 2
+_ROTARY_POLL_INTERVAL_MS = 1
+_ROTARY_DETENT_STEPS = 4
 
 class RotaryHandler:
     def __init__(self, mcp, port, pins, queue):
@@ -36,10 +37,7 @@ class RotaryHandler:
     
     def _enqueue_turn_event(self, clockwise):
         direction = 1 if clockwise else -1
-        if clockwise:
-            self.value = min(self.max_val, self.value + direction)
-        else:
-            self.value = max(self.min_val, self.value - direction)
+        self.value = min(self.max_val, max(self.min_val, self.value + direction))
         
         self.queue.append((
             "rotary_turn",
@@ -48,11 +46,14 @@ class RotaryHandler:
                 "value": self.value,
             }
         ))
-        self._accum = 0
 
     async def run(self):
         while True:
-            val = self.port.gpio
+            try:
+                val = self.port.gpio
+            except OSError:
+                await asyncio.sleep_ms(_ROTARY_POLL_INTERVAL_MS)
+                continue
             clk = (val >> self.pins["clk"]) & 1
             dt  = (val >> self.pins["dt"]) & 1
             curr_state = (clk << 1) | dt
@@ -63,12 +64,16 @@ class RotaryHandler:
 
             if delta != 0:
                 self._accum += delta
+            elif curr_state != self.prev_state:
+                # Invalid 2-bit jump (usually bounce or missed sample): reset partial turn.
+                self._accum = 0
 
-                # one full detent = 4 transitions
-                if self._accum >= 4:
-                    self._enqueue_turn_event(clockwise=True)
-                elif self._accum <= -4:
-                    self._enqueue_turn_event(clockwise=False)
+            if self._accum >= _ROTARY_DETENT_STEPS:
+                self._enqueue_turn_event(clockwise=True)
+                self._accum -= _ROTARY_DETENT_STEPS
+            elif self._accum <= -_ROTARY_DETENT_STEPS:
+                self._enqueue_turn_event(clockwise=False)
+                self._accum += _ROTARY_DETENT_STEPS
 
             self.prev_state = curr_state
 

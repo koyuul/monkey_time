@@ -1,7 +1,6 @@
 """
     Analog input manager: init + asyncio task for MCP23017 inputs.
 """
-import time
 
 import uasyncio as asyncio
 import utils.mcp23017
@@ -21,7 +20,11 @@ _ROTARY_1_PINS = {
     "dt": 4,
     "clk": 3,
 }
-
+_ROTARY_2_PINS = {
+    "sw": 5,
+    "dt": 4,
+    "clk": 3,
+}
 class AnalogInputManager:
     def __init__(self):
         """Initialize I2C and MCP23017 and configure pins as inputs with pull-ups."""
@@ -35,6 +38,7 @@ class AnalogInputManager:
             ButtonHandler(self.mcp, 0, self.queue),
             ButtonHandler(self.mcp, 1, self.queue),
             RotaryHandler(self.mcp, self.mcp.porta, _ROTARY_1_PINS, self.queue),
+            RotaryHandler(self.mcp, self.mcp.portb, _ROTARY_2_PINS, self.queue),
         ]
 
         self.callbacks = {}
@@ -64,6 +68,8 @@ class AnalogInputManager:
                         # handle async callbacks too
                         if hasattr(result, "__await__"):
                             asyncio.create_task(result)
+                # Always yield so handler tasks keep polling GPIO reliably.
+                await asyncio.sleep_ms(0)
             else:
                 await asyncio.sleep_ms(_MCP_POLL_INTERVAL_MS)
 

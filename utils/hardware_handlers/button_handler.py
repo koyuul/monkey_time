@@ -15,7 +15,11 @@ class ButtonHandler:
     
     async def run(self):
         while True:
-            button_pressed = self.mcp.pin(self.pin)
+            try:
+                button_pressed = self.mcp.pin(self.pin)
+            except OSError:
+                await asyncio.sleep_ms(_BUTTON_POLL_INTERVAL_MS)
+                continue
             if button_pressed == 0 and self.last_state == 1:
                 self.queue.append((
                     "button_press",
@@ -23,3 +27,4 @@ class ButtonHandler:
                 ))
             self.last_state = button_pressed
             await asyncio.sleep_ms(_BUTTON_POLL_INTERVAL_MS)
+                                                                                                    
