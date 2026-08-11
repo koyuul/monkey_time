@@ -1,6 +1,5 @@
 import lvgl as lv
 import uasyncio as asyncio
-from lib.screens import home_screen
 
 
 class ComponentManager:
@@ -61,6 +60,3 @@ class ComponentManager:
                 self.button_pressed = False
 
             await asyncio.sleep_ms(10)
-
-    def build_ui(self):
-        home_screen.build(self.lvgl_manager.scr, self)

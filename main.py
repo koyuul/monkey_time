@@ -4,7 +4,9 @@
 import uasyncio as asyncio
 from lib.analog_input_manager import AnalogInputManager
 from lib.component_manager import ComponentManager
+from lib.components.screens.clock_screen import ClockScreen
 from lib.lvgl_manager import LVGLManager
+from lib.screen_manager import ScreenManager
 from lib.time_manager import TimeManager
 
 
@@ -22,14 +24,21 @@ async def _scheduler_loop():
 
     # Handle LVGL navigation via analog input
     component_manager = ComponentManager(analog_input_manager, lvgl_manager,)
-    component_manager.build_ui()
     tasks.append(asyncio.create_task(component_manager.handle_input()))
 
     # Handle time management
     time_manager = TimeManager(analog_input_manager.get_i2c())
-    print(time_manager.get_time())
+
+    # Handle screen logic
+    screen_manager = ScreenManager()
+    clock_screen = ClockScreen(time_manager)
+    screen_manager.register("clock", clock_screen)
+    screen_manager.show("clock")
 
     while True:
+        print(time_manager.get_time())
+        time_manager.notify()
+        screen_manager.update()
         await asyncio.sleep(1)
 
 def main():

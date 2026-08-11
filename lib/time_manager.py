@@ -1,5 +1,3 @@
-import time
-
 import utils.urtc as urtc
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -8,6 +6,15 @@ WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sun
 class TimeManager:
     def __init__(self, i2c):
         self.rtc = urtc.DS3231(i2c)
+        self.subscribers = []
+
+    def subscribe(self, callback):
+        self.subscribers.append(callback)
+
+    def notify(self):
+        current_time = self.get_time()
+        for callback in self.subscribers:
+            callback(current_time)
     
     # Time should be in format:(Y, M, D, wk_day, h, m, s, ms)
     def set_time(self, event, time_tuple):
