@@ -1,4 +1,4 @@
-from lvgl import lv
+import lvgl as lv
 
 """
     Screen Manager is responsible for:
@@ -28,7 +28,7 @@ class ScreenManager:
 
         # Load a new screen
         screen = self.screens[name]
-        lv.scr_load(screen.root)
+        lv.screen_load(screen.root)
         screen.enter()
         self.current = screen
     

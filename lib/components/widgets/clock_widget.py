@@ -15,7 +15,7 @@ class ClockWidget(BaseWidget):
         self.root.set_flex_flow(lv.FLEX_FLOW.COLUMN)
 
     def set_time(self, dt):
-        self.time.set_text(dt)
+        self.time.set_text(f"{dt.hour}:{dt.minute}:{dt.second}")
     
     def set_ampm(self, ampm):
         self.ampm.set_text(ampm)
