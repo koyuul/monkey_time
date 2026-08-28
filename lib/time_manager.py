@@ -6,7 +6,7 @@ class TimeManager:
     H = "hour"
     M = "minute"
     S = "second"
-    
+
     def __init__(self, i2c):
         self.rtc = urtc.DS3231(i2c)
         self.subscribers = {
@@ -19,6 +19,9 @@ class TimeManager:
 
     def subscribe(self, callback, timing):
         self.subscribers[timing].append(callback)
+
+    def unsubscribe(self, callback, timing):
+        self.subscribers[timing].remove(callback)
 
     def notify(self):
         now = self.get_time()

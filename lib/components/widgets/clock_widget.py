@@ -5,8 +5,7 @@ from lib.components.widgets.base_widget import BaseWidget
 class ClockWidget(BaseWidget):
     def __init__(self, base, time_manager):
         super().__init__(base)
-
-        time_manager.subscribe(self.set_time, time_manager.S)
+        self.time_manager = time_manager
 
         self.time = lv.label(self.root)
         self.ampm = lv.label(self.root)
@@ -20,4 +19,8 @@ class ClockWidget(BaseWidget):
     def set_ampm(self, ampm):
         self.ampm.set_text(ampm)
 
-    
+    def activate(self):
+        self.time_manager.subscribe(self.set_time, self.time_manager.S)
+
+    def deactivate(self):
+        self.time_manager.unsubscribe(self.set_time, self.time_manager.S)

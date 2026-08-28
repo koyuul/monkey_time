@@ -1,6 +1,6 @@
 import lvgl as lv
-from lib.components.widgets.clock_widget import ClockWidget
 from lib.components.screens.base_screen import BaseScreen
+from lib.components.widgets.clock_widget import ClockWidget
 
 
 class ClockScreen(BaseScreen):
@@ -16,3 +16,9 @@ class ClockScreen(BaseScreen):
         # Create and center clock
         self.clock = ClockWidget(self.root, self.time_manager)
         self.clock.center()
+
+    def enter(self):
+        self.clock.activate()
+
+    def leave(self):
+        self.clock.deactivate()

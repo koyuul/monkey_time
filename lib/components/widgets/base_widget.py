@@ -28,3 +28,9 @@ class BaseWidget:
 
     def delete(self):
         self.root.delete()
+
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        pass
