@@ -2,8 +2,11 @@ import utils.urtc as urtc
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-
 class TimeManager:
+    H = "hour"
+    M = "minute"
+    S = "second"
+    
     def __init__(self, i2c):
         self.rtc = urtc.DS3231(i2c)
         self.subscribers = {

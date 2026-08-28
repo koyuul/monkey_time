@@ -6,7 +6,7 @@ class ClockWidget(BaseWidget):
     def __init__(self, base, time_manager):
         super().__init__(base)
 
-        time_manager.subscribe(self.set_time)
+        time_manager.subscribe(self.set_time, time_manager.S)
 
         self.time = lv.label(self.root)
         self.ampm = lv.label(self.root)
