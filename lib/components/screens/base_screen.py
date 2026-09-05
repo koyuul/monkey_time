@@ -23,6 +23,7 @@ class BaseScreen:
     # Use to add widgets to automatically activate/deactivate on enter/leave
     def add_widget(self, widget):
         self.widgets.append(widget)
+        return widget
 
     # Use for per-screen functions on a loop call (eg: idle screen timer)
     def update(self):
