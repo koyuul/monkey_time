@@ -4,11 +4,12 @@ _ROTARY_POLL_INTERVAL_MS = 1
 _ROTARY_DETENT_STEPS = 4
 
 class RotaryHandler:
-    def __init__(self, mcp, port, pins, queue):
+    def __init__(self, mcp, port, pins, queue, encoder_id=0):
         self.mcp = mcp
         self.port = port
         self.pins = pins
         self.queue = queue
+        self.id = encoder_id
 
         self.value = 0
         self.min_val = 0
@@ -42,6 +43,7 @@ class RotaryHandler:
         self.queue.append((
             "rotary_turn",
             {
+                "id": self.id,
                 "direction": direction,
                 "value": self.value,
             }
@@ -87,6 +89,7 @@ class RotaryHandler:
                         self.queue.append((
                             "rotary_press",
                             {
+                                "id": self.id,
                                 "value": self.value
                             }
                         ))

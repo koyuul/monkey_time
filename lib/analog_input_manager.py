@@ -15,6 +15,20 @@ _MCP_FREQ = 400000
 _MCP_ADDRESS = 0x20
 _MCP_POLL_INTERVAL_MS = 1
 
+# Hardware identifier constants
+ROTARY_1 = "rotary_1"
+ROTARY_2 = "rotary_2"
+
+BUTTON_0 = "button_0"
+BUTTON_1 = "button_1"
+
+# Semantic aliases
+BTN_0 = BUTTON_0
+BTN_1 = BUTTON_1
+
+_BUTTON_0_PIN = 0
+_BUTTON_1_PIN = 1
+
 _ROTARY_1_PINS = {
     "sw": 5,
     "dt": 4,
@@ -35,10 +49,10 @@ class AnalogInputManager:
         self.queue = []
 
         self.handlers = [
-            ButtonHandler(self.mcp, 0, self.queue),
-            ButtonHandler(self.mcp, 1, self.queue),
-            RotaryHandler(self.mcp, self.mcp.porta, _ROTARY_1_PINS, self.queue),
-            RotaryHandler(self.mcp, self.mcp.portb, _ROTARY_2_PINS, self.queue),
+            ButtonHandler(self.mcp, _BUTTON_0_PIN, self.queue, button_id=BUTTON_0),
+            ButtonHandler(self.mcp, _BUTTON_1_PIN, self.queue, button_id=BUTTON_1),
+            RotaryHandler(self.mcp, self.mcp.porta, _ROTARY_1_PINS, self.queue, encoder_id=ROTARY_1),
+            RotaryHandler(self.mcp, self.mcp.portb, _ROTARY_2_PINS, self.queue, encoder_id=ROTARY_2),
         ]
 
         self.callbacks = {}
@@ -62,6 +76,7 @@ class AnalogInputManager:
                 event = self.queue.pop(0)
                 event_type = event[0]
                 if event_type in self.callbacks:
+                    print("Event fired: ", event)
                     for cb, args, kwargs in self.callbacks[event_type]:
                         result = cb(event, *args, **kwargs)
 
