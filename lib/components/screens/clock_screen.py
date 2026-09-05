@@ -14,7 +14,7 @@ class ClockScreen(BaseScreen):
         self.root.set_style_bg_color(lv.color_black(), 0)
 
         # Create and center clock
-        self.clock = ClockWidget(self.root, self.time_manager)
+        self.clock = self.add_widget(ClockWidget(self.root, self.time_manager))
         self.clock.center()
 
     def enter(self):
