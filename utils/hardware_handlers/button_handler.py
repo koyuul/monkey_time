@@ -7,12 +7,12 @@ _BUTTON_POLL_INTERVAL_MS = 10
 
 class ButtonHandler:
     def __init__(self, mcp, pin, queue, button_id=None):
-        mcp.pin(pin, mode=_BUTTON_MCP_INPUT, pullup=True, polarity=1)
+        mcp.pin(pin, mode=_BUTTON_MCP_INPUT, pullup=True, polarity=0)
         self.mcp = mcp
         self.pin = pin
         self.queue = queue
         self.id = button_id if button_id is not None else pin
-        self.last_state = 1
+        self.last_state = self.mcp.pin(self.pin)
     
     async def run(self):
         while True:

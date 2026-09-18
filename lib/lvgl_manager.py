@@ -10,7 +10,7 @@ from micropython import const
 
 _DISPLAY_WIDTH = const(480)
 _DISPLAY_HEIGHT = const(320)
-_DISPLAY_ROT = const(0xE0)
+_DISPLAY_ROT = const(0x20)
 _DISPLAY_BGR = const(1)
 _DISPLAY_RGB565_BYTE_SWAP = const(1)
 

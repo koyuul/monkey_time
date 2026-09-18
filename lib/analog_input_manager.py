@@ -30,14 +30,14 @@ _BUTTON_0_PIN = 0
 _BUTTON_1_PIN = 1
 
 _ROTARY_1_PINS = {
-    "sw": 5,
+    "sw": 3,
     "dt": 4,
-    "clk": 3,
+    "clk": 5,
 }
 _ROTARY_2_PINS = {
-    "sw": 5,
+    "sw": 3,
     "dt": 4,
-    "clk": 3,
+    "clk": 5,
 }
 class AnalogInputManager:
     def __init__(self):
