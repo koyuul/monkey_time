@@ -3,8 +3,9 @@
 """
 
 import uasyncio as asyncio
-import utils.mcp23017
 from machine import I2C, Pin
+
+import utils.mcp23017
 from utils.hardware_handlers.button_handler import ButtonHandler
 from utils.hardware_handlers.rotary_handler import RotaryHandler
 
@@ -31,13 +32,13 @@ _BUTTON_1_PIN = 1
 
 _ROTARY_1_PINS = {
     "sw": 3,
-    "dt": 4,
-    "clk": 5,
+    "dt": 5,
+    "clk": 4,
 }
 _ROTARY_2_PINS = {
     "sw": 3,
-    "dt": 4,
-    "clk": 5,
+    "dt": 5,
+    "clk": 4,
 }
 class AnalogInputManager:
     def __init__(self):
