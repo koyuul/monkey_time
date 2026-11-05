@@ -1,4 +1,5 @@
 import lvgl as lv
+
 from lib.components.screens.base_screen import BaseScreen
 from lib.components.widgets.clock_widget import ClockWidget
 
@@ -7,18 +8,16 @@ class ClockScreen(BaseScreen):
     def __init__(self, time_manager):
         super().__init__()
         self.time_manager = time_manager
-        self.clock = None
         
     def build(self):
-        # Set bg color
-        self.root.set_style_bg_color(lv.color_black(), 0)
+        super().build()
+        clock_widget = ClockWidget(self.root, 4, 2, self.time_manager)
+        self.place_widget(clock_widget, 2, 1)
+        self.add_widget(clock_widget)
 
-        # Create and center clock
-        self.clock = self.add_widget(ClockWidget(self.root, self.time_manager))
-        self.clock.center()
 
     def enter(self):
-        self.clock.activate()
+        super().enter()
 
     def leave(self):
-        self.clock.deactivate()
+        super().leave()

@@ -2,12 +2,20 @@ import lvgl as lv
 
 
 class BaseWidget:
-    def __init__(self, parent):
+    def __init__(self, parent, width, height):
         self.root = lv.obj(parent)
+        self.width = width
+        self.height = height
 
-    """
-        Build the widget's inner layout based on the given size.
-    """
+        # Default widget styling (visible border for visual bounds)
+        self.root.set_style_bg_opa(255, 0)
+        self.root.set_style_border_width(2, 0)
+        self.root.set_style_border_color(lv.color_make(255, 255, 255), 0)
+        self.root.set_style_border_side(lv.BORDER_SIDE.FULL, 0)
+
+    def build(self):
+        raise NotImplementedError
+
     def show(self):
         self.root.clear_flag(lv.obj.FLAG.HIDDEN)
 
@@ -17,14 +25,10 @@ class BaseWidget:
     def center(self):
         self.root.center()
 
+    # All sizing is in cells units of the grid
     def set_size(self, w, h):
-        self.root.set_size(w, h)
-
-    def set_width(self, w):
-        self.root.set_width(w)
-
-    def set_height(self, h):
-        self.root.set_height(h)
+        self.width = w
+        self.height = h
 
     def delete(self):
         self.root.delete()

@@ -2,8 +2,14 @@
     Analog input manager: init + asyncio task for MCP23017 inputs.
 """
 
+
 import uasyncio as asyncio
-from machine import I2C, Pin
+
+try:
+    from machine import I2C, Pin
+except (ImportError, AttributeError):
+    I2C = None
+    Pin = None
 
 import utils.mcp23017
 from utils.hardware_handlers.button_handler import ButtonHandler
