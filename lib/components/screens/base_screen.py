@@ -1,5 +1,7 @@
 import lvgl as lv
 
+from lib.styles.theme import PALETTES
+
 
 class BaseScreen:
     COLS = 6
@@ -27,6 +29,9 @@ class BaseScreen:
         self.root.set_style_pad_column(0, 0)    # Remove gap between columns
         self.root.set_style_border_width(0, 0)
         self.root.remove_flag(lv.obj.FLAG.SCROLLABLE)  # Prevent scrollbars from popping up
+
+        # Default screen styles
+        self.root.set_style_bg_color(PALETTES["LIGHT_MODE"]["BACKGROUND"], 0)
 
         # self._build_grid_overlay() # Uncomment for debugging
 

@@ -15,7 +15,6 @@ class ClockScreen(BaseScreen):
         self.place_widget(clock_widget, 2, 1)
         self.add_widget(clock_widget)
 
-
     def enter(self):
         super().enter()
 

@@ -44,9 +44,7 @@ async def _scheduler_loop(use_peripherals):
     
     seconds_elapsed = 0 
     while True:
-        if use_peripherals:
-            print(time_manager.get_time())
-            time_manager.notify()
+        time_manager.notify()
         screen_manager.update()
 
         # Test screen swapping

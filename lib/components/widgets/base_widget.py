@@ -1,17 +1,21 @@
 import lvgl as lv
 
+from lib.styles.theme import PALETTES
+
 
 class BaseWidget:
-    def __init__(self, parent, width, height):
+    def __init__(self, parent, width, height, palette=PALETTES["LIGHT_MODE"]):
         self.root = lv.obj(parent)
         self.width = width
         self.height = height
 
         # Default widget styling (visible border for visual bounds)
-        self.root.set_style_bg_opa(255, 0)
+        self.palette = dict(palette)
+        self.root.set_style_bg_opa(0, 0)
         self.root.set_style_border_width(2, 0)
         self.root.set_style_border_color(lv.color_make(255, 255, 255), 0)
         self.root.set_style_border_side(lv.BORDER_SIDE.FULL, 0)
+        self.root.set_style_text_color(palette["LIGHT_MODE"]["NEUTRAL"], 0)
 
     def build(self):
         raise NotImplementedError
