@@ -9,13 +9,20 @@ class BaseWidget:
         self.width = width
         self.height = height
 
+        # Load some fonts
+        self.fonts = {
+            "space_mono_lg": lv.binfont_create("K:space_mono_96.bin"),
+            "space_sans_serif_md": lv.binfont_create("K:space_sans_serif_16.bin")
+        }
+        self.root.set_style_text_font(self.fonts["space_sans_serif_md"], 0)
+        
         # Default widget styling (visible border for visual bounds)
         self.palette = dict(palette)
         self.root.set_style_bg_opa(0, 0)
         self.root.set_style_border_width(2, 0)
         self.root.set_style_border_color(lv.color_make(255, 255, 255), 0)
         self.root.set_style_border_side(lv.BORDER_SIDE.FULL, 0)
-        self.root.set_style_text_color(palette["LIGHT_MODE"]["NEUTRAL"], 0)
+        self.root.set_style_text_color(palette["NEUTRAL"], 0)
 
     def build(self):
         raise NotImplementedError

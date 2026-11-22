@@ -8,6 +8,8 @@ import lvgl as lv
 import uasyncio as asyncio
 from micropython import const
 
+from lib import fs_driver
+
 # Try linux SDL
 try:
     import sdl_display
@@ -42,6 +44,10 @@ class LVGLManager:
         """Initialize LVGL and set up display/input drivers."""
         # Initialize LVGL
         lv.init()
+
+        # Register file system driver for LVGL asset loading (e.g. fonts, images)
+        self.fs_drv = lv.fs_drv_t()
+        fs_driver.fs_register(self.fs_drv, 'K')
 
         # Initialize hardware setup
         if sys.platform == "linux":
