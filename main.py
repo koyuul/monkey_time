@@ -60,7 +60,7 @@ async def _scheduler_loop(use_peripherals):
         await asyncio.sleep(1)
 
 
-def main(use_peripherals=True):
+def main(use_peripherals=False):
     if not use_peripherals:
         print("Use peripherals is False, using screen only")
 

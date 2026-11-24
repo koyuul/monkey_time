@@ -4,6 +4,8 @@ import time
 import utils.urtc as urtc
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
 
 class DummyRTC:
     """Mock RTC that generates a randomized reasonable datetime and ticks forward in real time."""
@@ -80,9 +82,17 @@ class TimeManager:
         return current_datetime
     
     # Get the current weekday as a string
-    def get_weekday(self):
-        current_datetime = self.rtc.datetime()
-        return WEEK[current_datetime.weekday]
+    def get_weekday(self, weekday=None):
+        if weekday is None:
+            weekday = self.rtc.datetime().weekday
+        return WEEK[weekday]
+
+    # Get the current month as a string
+    def get_month(self, month=None):
+        if month is None:
+            month = self.rtc.datetime().month
+        return MONTH[month]
+
     
     # RTC has a temperature sensor, so this is a free gimme
     def get_temperature(self):

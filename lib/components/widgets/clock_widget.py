@@ -23,7 +23,7 @@ class ClockWidget(BaseWidget):
         # 1. Day of the week (smaller font, on top)
         self.weekday = lv.label(self.root)
         self.weekday.set_style_text_font(self.fonts["space_sans_serif_md"], 0)
-        self.weekday.set_style_text_color(self.palette.get("STATUS", self.palette["NEUTRAL"]), 0)
+        self.weekday.set_style_text_color(self.palette["ACCENT"], 0)
         self.weekday.set_text("")
 
         # 2. Time (enlarged font, below the day)
@@ -36,7 +36,9 @@ class ClockWidget(BaseWidget):
         self.time.set_text(f"{dt.hour:02d}:{dt.minute:02d}")
 
     def set_weekday(self, dt):
-        self.weekday.set_text(WEEK[dt.weekday].upper())
+        month_str = self.time_manager.get_month(dt.month)
+        weekday_str = self.time_manager.get_weekday(dt.weekday)
+        self.weekday.set_text(f"{month_str} {dt.day}, {weekday_str}")
 
     def activate(self):
         # Update immediately on activation so labels aren't blank
